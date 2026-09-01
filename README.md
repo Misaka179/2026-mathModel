@@ -36,7 +36,7 @@ questions/Q1/
 
 skill 原生输出（`planning/`、`methods/`、`results/`…）如何归档进上述编号目录，见 `docs/workflow.md` 末尾的映射表。
 
-## 5. Role Prompt
+## 5. Role Prompt（各自在群里先前上传的）
 
 - A → `prompts/A_model/`
 - B → `prompts/B_data/`
@@ -46,9 +46,9 @@ skill 原生输出（`planning/`、`methods/`、`results/`…）如何归档进�
 
 | 步骤 | 交接物 | 提交人 → 接收人 |
 |---|---|---|
-| A 完成模型 | `02_model/model_decision.md` + `model_spec.md` | A → B |
-| B 完成求解 | `05_results/verified_results.md` + `06_figures/figure_plan.md` | B → C |
-| C 完成论文 | `07_paper/paper_v1` | C → 全队 |
+| A 完成模型 | `model_decision.md`（MODEL FROZEN）+ `model_spec.md` | A → B、C |
+| B 完成求解 | `verified_results.md` + `figure_plan.md` + `figures/` | B → C |
+| C 完成论文 | `paper_v1.pdf` → `paper_review.md` → `final_paper.pdf` | C → 全队 |
 
 交接协议与目录权限见 `docs/handoff.md`。
 
