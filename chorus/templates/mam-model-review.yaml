@@ -1,0 +1,39 @@
+id: mam-model-review
+name: 数模-模型方案三方审查 (数学/数据/算法)
+description: 手动粘贴模型方案 md，由数学建模审查员(opus)、数据审查员(codex)、求解算法审查员(deepseek-v4)三方并行独立审查，输出冲突问题汇总供人工裁决。对应 subagent分工.md 的 Agent1/2/3。
+author: user
+agreementThreshold: 0.5
+onThresholdMet: merge
+maxRounds: 1
+yoloDefault: false
+estimatedBaselineTokens: 900
+ship:
+  enabled: false
+phases:
+  - id: model-review
+    kind: review_only
+    title: 模型方案三方审查
+    description: 数学/数据/算法三位审查员并行审查手动粘贴的模型方案。
+    reviewer:
+      require: 3
+      crossLineage: true
+      candidates:
+        - lineage: anthropic
+          models:
+            - claude-opus-5
+          persona: mam-math-reviewer
+        - lineage: openai
+          models:
+            - gpt-5.6-sol
+          persona: mam-data-reviewer
+        - lineage: opencode
+          models:
+            - deepseek/deepseek-v4-pro
+          persona: mam-algo-reviewer
+    artifact:
+      label: 模型方案 (md)
+      hint: 粘贴你要审查的模型方案 md 全文（题目分析报告 / 建模方案）。
+      maxBytes: 1048576
+    inputs:
+      include: []
+      exclude: []

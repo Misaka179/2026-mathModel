@@ -1,0 +1,31 @@
+id: mam-paper-review
+name: 数模-论文审查 (论文审稿人)
+description: 手动粘贴论文草稿 md，由论文审稿人(sunnet-5)审查摘要/模型建立/求解/结果/指标/语言/图表/格式，输出证据-结论一致性检查供人工裁决。对应 subagent分工.md 的 Agent4。
+author: user
+agreementThreshold: 0.5
+onThresholdMet: merge
+maxRounds: 1
+yoloDefault: false
+estimatedBaselineTokens: 900
+ship:
+  enabled: false
+phases:
+  - id: paper-review
+    kind: review_only
+    title: 论文审查
+    description: 论文审稿人审查手动粘贴的论文草稿。
+    reviewer:
+      require: 1
+      crossLineage: false
+      candidates:
+        - lineage: anthropic
+          models:
+            - claude-sonnet-5
+          persona: mam-paper-reviewer
+    artifact:
+      label: 论文草稿 (md)
+      hint: 粘贴你的论文草稿 md（或待审章节）。
+      maxBytes: 1048576
+    inputs:
+      include: []
+      exclude: []

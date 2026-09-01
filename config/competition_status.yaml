@@ -1,0 +1,66 @@
+# competition_status.yaml — 机器读的团队进度状态
+# 由各人按职责更新并 commit；Claude Code 可读取此文件了解当前进行到哪一步。
+# status 取值: not_started / modeling / data / solving / paper_writing / review / done
+
+Q1:
+  status: not_started
+  model:
+    owner: A
+    frozen: false
+    file: questions/Q1/02_model/model_spec.md
+  data:
+    owner: B
+    verified: false
+  results:
+    owner: B
+    verified: false
+    file: questions/Q1/05_results/verified_results.md
+  figures:
+    owner: B
+    verified: false
+  paper:
+    owner: C
+    draft: false
+    reviewed: false
+
+Q2:
+  status: not_started
+  model:
+    owner: A
+    frozen: false
+    file: questions/Q2/02_model/model_spec.md
+  data:
+    owner: B
+    verified: false
+  results:
+    owner: B
+    verified: false
+    file: questions/Q2/05_results/verified_results.md
+  figures:
+    owner: B
+    verified: false
+  paper:
+    owner: C
+    draft: false
+    reviewed: false
+
+Q3:
+  status: not_started
+  model:
+    owner: A
+    frozen: false
+    file: questions/Q3/02_model/model_spec.md
+  data:
+    owner: B
+    verified: false
+  results:
+    owner: B
+    verified: false
+    file: questions/Q3/05_results/verified_results.md
+  figures:
+    owner: B
+    verified: false
+  paper:
+    owner: C
+    draft: false
+    reviewed: false

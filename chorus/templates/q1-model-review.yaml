@@ -1,0 +1,41 @@
+id: q1-model-review
+name: Q1模型评审 (Claude→Codex+DeepSeek)
+description: C题第一问题目分析与模型推荐。Claude Opus 5 作为 doer 产出分析报告；OpenAI Codex (gpt-5.6-sol)、OpenCode DeepSeek V4 Pro、Claude Sonnet 5 独立评审。用于跑通跨阵营 chorus。
+author: user
+agreementThreshold: 0.5
+onThresholdMet: merge
+maxRounds: 2
+yoloDefault: false
+estimatedBaselineTokens: 900
+ship:
+  enabled: false
+phases:
+  - id: review
+    kind: review
+    title: Q1 分析与模型推荐
+    description: Claude Opus 5 产出C题第一问的题目分析与模型推荐；Codex、DeepSeek V4、Sonnet 5 独立评审。
+    doer:
+      lineage: anthropic
+      models:
+        - claude-opus-5
+    reviewer:
+      require: 3
+      crossLineage: true
+      candidates:
+        - lineage: openai
+          models:
+            - gpt-5.6-sol
+        - lineage: opencode
+          models:
+            - deepseek/deepseek-v4-pro
+        - lineage: anthropic
+          models:
+            - claude-sonnet-5
+    inputs:
+      include: []
+      exclude: []
+    iterate:
+      maxRounds: 2
+      onDisagreement: accept-doer
+      shareSessionAcrossRounds: false
+      shareSessionAcrossPhases: false
