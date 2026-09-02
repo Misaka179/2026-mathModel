@@ -1,10 +1,10 @@
 # Math Modeling Team
 
-2026 国赛备赛团队协作仓库。**Git 管共同的东西，Claude Code 管个人的工作，交接文件管人与人之间的接口。**
+2026 国赛备赛团队协作仓库。**Git 管共同的东西，交接文件管人与人之间的交接。**
 
 ## 1. Team Workflow
 
-| 角色 | 负责 | 主要 skill |
+| 角色 | 负责 | 主要 skill（可以自行添加） |
 |---|---|---|
 | A — 建模手 | 建模分析 / 方法决策 | `problem-parser`、`problem-classifier`、`method-selector`、`decision-prompt-builder`、`modeler-decision-logger` |
 | B — 编程手 | 数据 / 计算 / 可视化 | `data-auditor-cleaner`、`model-code-analyzer`、`python/matlab-model-code-generator`、`code-reviewer`、`result-report-generator`、`figure-table-planner`、`math-figure-generator` |
@@ -13,8 +13,8 @@
 ## 2. AI Stack
 
 - **Claude Code**（三人各自的本地 Agent 环境，互不共用 workspace）
-- **MathModeling Skills**：见 `skills/`（31 个 v2 skill 已打包，含一键安装脚本）
-- **Chorus** 多模型评审：模板见 `chorus/templates/`
+- **MathModeling Skills**：见 `skills/`
+- **Chorus** 多模型评审：模板见 `chorus/templates/`,目前A文件夹中都是我的模板，可自行在B/C文件夹补充。
 
 ## 3. Rules
 
@@ -44,7 +44,7 @@ skill 原生输出（`planning/`、`methods/`、`results/`…）如何归档进�
 
 ## 6. Handoff
 
-| 步骤 | 交接物 | 提交人 → 接收人 |
+| 步骤 | 交接物（具体见handoff文件） | 提交人 → 接收人 |
 |---|---|---|
 | A 完成模型 | `model_decision.md`（MODEL FROZEN）+ `model_spec.md` | A → B、C |
 | B 完成求解 | `verified_results.md` + `figure_plan.md` + `figures/` | B → C |
@@ -71,7 +71,7 @@ bash skills/install.sh
 
 ## 9. Emergency
 
-遇到以下情况立即 **STOP** 并拉人，不要硬做：
+遇到以下情况立即 **STOP** ，不要硬做：
 
 - 模型冲突 → STOP
 - 结果异常 → STOP

@@ -10,9 +10,10 @@
 | `mam-model-review.yaml` | 模型方案三方审查（数学建模 / 数据 / 求解算法） | `require: 3`，`crossLineage: true`（anthropic + openai + opencode 三家） |
 | `mam-paper-review.yaml` | 论文评审 | — |
 
-## 典型调用时机（来自 A 建模决策 prompt）
+## 典型调用时机
 
-1. **候选评审**：生成 `model_candidates.md` 后，用 `q1-model-review.yaml` 评审全部候选方案；保存所有评审资料。
+## **候选评审**：生成 `model_candidates.md` 后，用 `q1-model-review.yaml` 评审全部候选方案；保存所有评审资料。
+
 2. **三方审查**：选定最终模型后，用 `mam-model-review.yaml` 做三方审核。三方检查分工：
    - 数学建模审查员：变量 / 目标 / 约束 / 数学逻辑 / 假设 / 模型类型
    - 数据审查员：数据是否支持 / 质量 / 参数来源 / 分布假设 / 数据泄漏 / 处理
