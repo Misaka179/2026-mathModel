@@ -17,7 +17,7 @@
 
 ## 团队协作规则
 
-11. AI 不得绕过 Human Decision Gate（方法决策 G2.5、结果判定 G4.5 必须由人盖章）
+11. AI 不得绕过 Human Decision Gate（方法决策 G2.5、结果判定 G4 必须由人盖章）
 12. B 不得修改 A 冻结模型
 13. C 不得修改结果数据
 14. 论文数字必须能够追溯至 results

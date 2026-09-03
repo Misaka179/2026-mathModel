@@ -1,0 +1,39 @@
+id: figure-review
+name: 图表规划多模型复核 (core_claim/归属/误导性)
+description: 手动粘贴 figure_plan.md，由三位审查员并行独立审查：①core_claim 是否虚/够不够撑论点 ②图进正文还是附录的归属 ③误导性(配色/Y轴截断/双Y轴/饼图/3D)。输出冲突问题汇总供人工裁决。注：引用的 b-figure-*-reviewer persona 需先在 chorus cockpit 的 Personas 页创建。
+author: user
+agreementThreshold: 0.5
+onThresholdMet: merge
+maxRounds: 1
+yoloDefault: false
+estimatedBaselineTokens: 900
+ship:
+  enabled: false
+phases:
+  - id: figure-review
+    kind: review_only
+    title: 图表规划三方复核
+    description: core_claim / 归属 / 误导性三位审查员并行审查 figure_plan.md。
+    reviewer:
+      require: 3
+      crossLineage: true
+      candidates:
+        - lineage: anthropic
+          models:
+            - claude-opus-5
+          persona: b-figure-claim-reviewer
+        - lineage: openai
+          models:
+            - gpt-5.6-sol
+          persona: b-figure-placement-reviewer
+        - lineage: opencode
+          models:
+            - deepseek/deepseek-v4-pro
+          persona: b-figure-mislead-reviewer
+    artifact:
+      label: 图表规划 (md)
+      hint: 粘贴你要复核的 figure_plan.md 全文（各图 core_claim 与归属）。
+      maxBytes: 1048576
+    inputs:
+      include: []
+      exclude: []
