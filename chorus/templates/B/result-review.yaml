@@ -1,0 +1,39 @@
+id: result-review
+name: 结果审计多模型复核 (数学正确性/方法论/业务合理性)
+description: 手动粘贴 result_audit.md，由三位审查员并行独立审查：①数学正确性(数量级/约束/边界粘滞) ②方法论(稳定性/过拟合/基准提升) ③业务合理性(现实意义)。输出冲突问题汇总供人工裁决。注：引用的 b-result-*-reviewer persona 需先在 chorus cockpit 的 Personas 页创建。
+author: user
+agreementThreshold: 0.5
+onThresholdMet: merge
+maxRounds: 1
+yoloDefault: false
+estimatedBaselineTokens: 900
+ship:
+  enabled: false
+phases:
+  - id: result-review
+    kind: review_only
+    title: 结果审计三方复核
+    description: 数学正确性 / 方法论 / 业务合理性三位审查员并行审查 result_audit.md。
+    reviewer:
+      require: 3
+      crossLineage: true
+      candidates:
+        - lineage: anthropic
+          models:
+            - claude-opus-5
+          persona: b-result-correctness-reviewer
+        - lineage: openai
+          models:
+            - gpt-5.6-sol
+          persona: b-result-method-reviewer
+        - lineage: opencode
+          models:
+            - deepseek/deepseek-v4-pro
+          persona: b-result-business-reviewer
+    artifact:
+      label: 结果审计报告 (md)
+      hint: 粘贴你要复核的 result_audit.md 全文（7 类异常扫描结论）。
+      maxBytes: 1048576
+    inputs:
+      include: []
+      exclude: []

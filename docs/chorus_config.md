@@ -1,18 +1,27 @@
 # Chorus Config
 
-多模型评审配置说明。模板位于 `chorus/templates/`。
+多模型评审配置说明。模板按角色分目录存放：`chorus/templates/A/`（建模）、`B/`（编程）、`C/`（论文）。模板和 persona 在 chorus 的网页控制台里注册，注册后自动生效。
+
+## 怎么注册模板 / persona（网页操作）
+
+1. 确认 chorus 在跑：命令行敲 `chorus start`（或 `chorus status` 看是否已在运行）。
+2. 浏览器打开 `http://127.0.0.1:5050`。
+3. 注册模板：进 **Templates** 页，新建模板，把仓库里对应 YAML（如 `chorus/templates/B/result-review.yaml`）的内容整段粘贴进去，保存。
+4. 注册 persona：进 **Personas** 页，为模板里引用的每个审查员各建一个，**id 要和模板 YAML 里写的 persona 名字完全一致**（如 `b-result-correctness-reviewer`），再填名称、一句话说明、系统提示词。
 
 ## 已有模板
 
-| 模板 | 用途 | 配置 |
-|---|---|---|
-| `q1-model-review.yaml` | 建模早期对候选方案的评审（题目分析报告/建模方案） | — |
-| `mam-model-review.yaml` | 模型方案三方审查（数学建模 / 数据 / 求解算法） | `require: 3`，`crossLineage: true`（anthropic + openai + opencode 三家） |
-| `mam-paper-review.yaml` | 论文评审 | — |
+| 模板 | 位置 | 用途 | 配置 |
+|---|---|---|---|
+| `q1-model-review.yaml` | A/ | 建模早期对候选方案的评审（题目分析报告/建模方案） | — |
+| `mam-model-review.yaml` | A/ | 模型方案三方审查（数学建模 / 数据 / 求解算法） | `require: 3`，`crossLineage: true`（anthropic + openai + opencode 三家） |
+| `mam-paper-review.yaml` | A/ | 论文评审 | — |
+| `result-review.yaml` | B/ | 结果审计多模型复核（数学正确性/方法论/业务合理性） | `require: 3`，`crossLineage: true` |
+| `figure-review.yaml` | B/ | 图表规划多模型复核（core_claim/归属/误导性） | `require: 3`，`crossLineage: true` |
 
 ## 典型调用时机
 
-## **候选评审**：生成 `model_candidates.md` 后，用 `q1-model-review.yaml` 评审全部候选方案；保存所有评审资料。
+1. **候选评审**：生成 `model_candidates.md` 后，用 `q1-model-review.yaml` 评审全部候选方案；保存所有评审资料。
 
 2. **三方审查**：选定最终模型后，用 `mam-model-review.yaml` 做三方审核。三方检查分工：
    - 数学建模审查员：变量 / 目标 / 约束 / 数学逻辑 / 假设 / 模型类型
