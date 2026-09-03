@@ -18,6 +18,7 @@
 | `mam-paper-review.yaml` | A/ | 论文评审 | — |
 | `result-review.yaml` | B/ | 结果审计多模型复核（数学正确性/方法论/业务合理性） | `require: 3`，`crossLineage: true` |
 | `figure-review.yaml` | B/ | 图表规划多模型复核（core_claim/归属/误导性） | `require: 3`，`crossLineage: true` |
+| `data-review.yaml` | B/ | 数据审计多模型复核（缺失/异常/重复处理，数据变换/共线性/泄漏，模型假设匹配/参数可估计性）| `require: 3`，`crossLineage: true` |
 
 ## 典型调用时机
 
@@ -28,6 +29,10 @@
    - 数据审查员：数据是否支持 / 质量 / 参数来源 / 分布假设 / 数据泄漏 / 处理
    - 算法审查员：LP/MILP/NLP / 求解器 / GA / 收敛 / 复杂度 / 参数 / 可复现性
 3. **论文评审**：论文成稿后用 `mam-paper-review.yaml`。
+4. **数据审计复核**：生成 `data_audit.md` 后，用 `data-review.yaml` 做三方复核。三位审查员分工：
+   - 缺失/异常/重复审查员（`b-data-missing-reviewer`）：缺失值、异常值、重复值的识别与处理是否合理
+   - 变换/共线性/泄漏审查员（`b-data-transform-reviewer`）：数据变换、共线性、数据泄漏
+   - 假设匹配审查员（`b-data-assumption-reviewer`）：模型假设匹配、参数可估计性
 
 ## 与 skill 的配合
 
