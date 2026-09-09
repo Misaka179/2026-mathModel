@@ -7,13 +7,25 @@
 
 ## 代码文件清单
 
+### 主要分析脚本
+
 | 文件 | 说明 | 状态 |
 |------|------|------|
-| `q1_analysis_part1.py` | 阶段0-2：环境准备、BMI检查、变量转换 | ✅ 已创建 |
-| `q1_analysis_part1.R` | 阶段0-2：R版本（原始设计） | ✅ 已创建 |
-| `q1_analysis_part2.py` | 阶段3-5：三模型拟合、诊断、Bootstrap | ⏳ 待创建 |
-| `q1_analysis_part3.py` | 阶段6-8：检验、敏感性分析、交互项 | ⏳ 待创建 |
-| `q1_analysis_part4.py` | 阶段9-10：生成结果表和效应解释 | ⏳ 待创建 |
+| `q1_analysis_complete.py` | 完整分析脚本：阶段0-3（环境、BMI检查、模型拟合） | ✅ 完成 |
+| `q1_analysis_integrated.py` | 诊断分析：阶段4（残差检查、Q-Q图、边界检查） | ✅ 完成 |
+| `robustness_checks.py` | 稳健性检验：Bootstrap 1000次 + 敏感性分析 | ✅ 完成 |
+| `verify_simpson.py` | Simpson悖论验证：定量证据 + 4张验证图 | ✅ 完成 |
+| `verify_chorus_issues.py` | Chorus审查问题验证 | ✅ 完成 |
+| `generate_fig1_2.py` | 生成Fig.1.2（Within vs Between对比图） | ✅ 完成 |
+
+### 早期版本（已弃用）
+
+| 文件 | 说明 | 状态 |
+|------|------|------|
+| `q1_analysis_part1.py` | 早期脚本（已整合到complete版本） | ⚠️ 已弃用 |
+| `q1_analysis_part1.R` | R版本（已改用Python） | ⚠️ 已弃用 |
+| `q1_part1_simple.py` | 简化版本（已整合） | ⚠️ 已弃用 |
+| `q1_analysis_part2_diagnostics.py` | 早期诊断脚本（已整合到integrated版本） | ⚠️ 已弃用 |
 
 ## 执行顺序
 
