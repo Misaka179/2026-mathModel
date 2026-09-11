@@ -17,6 +17,7 @@ Thumbs.db
 *.tmp
 *.bak
 *.swp
+~$*
 
 # 大型原始数据 / 二进制产物（个人 workspace 自留，不进仓库）
 workspace/
@@ -24,6 +25,10 @@ workspace/
 *.csv
 *.pkl
 *.npz
+
+# 但答案文件和结果文件例外（需要版本控制）
+!answer/*.xlsx
+!questions/*/05_results/*.xlsx
 
 # 论文编译中间产物（final/ 只放成品）
 *.aux
