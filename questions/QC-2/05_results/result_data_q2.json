@@ -19,10 +19,10 @@
     "max_cost": 112098.78982362655
   },
   "storage_value": {
-    "baseline_annual_cost": 82036598.15990753,
+    "baseline_annual_cost": 16407320,
     "with_storage_cost": 14120324.29274246,
-    "annual_savings": 67916273.86716507,
-    "savings_percentage": 82.78777446961072
+    "annual_savings": 2286995.70725754,
+    "savings_percentage": 13.939953276498045
   },
   "energy_efficiency": {
     "total_E_plan_kWh": 20723639.933591384,
