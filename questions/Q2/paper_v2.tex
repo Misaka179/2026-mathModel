@@ -1,0 +1,576 @@
+% ============================================================
+% 2025年高教社杯全国大学生数学建模竞赛 C题 第一问论文 V1
+% 负责人：C（江宇巍，论文手）
+% 数字来源：B交付 verified_results.md（唯一数字来源）
+% 图表来源：B交付 figure_plan.md（Core Claim 已人类确认）
+% ============================================================
+\documentclass[12pt,a4paper]{ctexart}
+
+% ---------- 页面设置 ----------
+\usepackage{geometry}
+\geometry{top=2.5cm,bottom=2.5cm,left=2.5cm,right=2.5cm}
+
+% ---------- 数学与表格 ----------
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs,multirow,array,makecell}
+\usepackage{graphicx}
+\usepackage[font=small,labelfont=bf]{caption}
+\captionsetup{format=hang}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{threeparttable}
+
+% ---------- 超链接 ----------
+\usepackage[colorlinks=true,linkcolor=black,urlcolor=blue]{hyperref}
+
+% ---------- 标题 ----------
+\title{\heiti 无创产前检测中胎儿Y染色体浓度与孕妇孕周、BMI的关系建模\\[4pt]
+\large 2025年高教社杯全国大学生数学建模竞赛C题第一问}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+% ============================================================
+% 摘要
+% ============================================================
+\begin{abstract}
+\noindent\textbf{问题背景：}无创产前检测（NIPT）通过母体血浆中的胎儿游离DNA筛查胎儿染色体异常，对男胎而言，Y染色体浓度能否达到4\%的判定阈值直接决定检测的可靠性，而该浓度与孕妇的孕周数和身体质量指数（BMI）紧密相关。本文针对题目第一问，利用某地区以高BMI孕妇为主的NIPT检测记录（男胎1082条检测记录、267位孕妇），分析胎儿Y染色体浓度与孕周数、BMI等指标的相关特性，建立关系模型并检验其显著性。
+
+\noindent\textbf{建模方法：}针对同一孕妇多次采血检测形成的重复测量结构，本文建立\textbf{线性混合效应模型}（M2），并对孕周与BMI同时进行\textbf{个体内--个体间（within--between）分解}，以区分"同一孕妇孕周推进"的纵向效应与"不同孕妇之间比较"的横向效应。模型采用限制极大似然（REML）估计，以聚类稳健OLS（M1）和广义估计方程（GEE）为对照。
+
+\noindent\textbf{主要结果：}（1）孕周与Y染色体浓度的关系呈现典型的\textbf{Simpson悖论}：个体内效应 $\beta_1^W=+0.003168$（95\%CI：$[+0.002805,+0.003532]$，$p<0.0001$），同一孕妇孕周每增加1周，Y浓度平均伴随上升约4.1\%；个体间效应 $\beta_2^B=-0.003286$（95\%CI：$[-0.004705,-0.001867]$，$p<0.0001$），平均孕周较高的孕妇Y浓度反而较低，两者大小相近而方向相反。定量证据表明，87.3\%的多次检测孕妇个体内趋势为正（个体内平均相关系数$r=+0.67$），而个体间相关为负（$r=-0.26$），早期检测孕妇基线Y浓度更高（$r=-0.30$），支持样本选择偏倚的解释。（2）BMI仅个体间效应显著（$\beta_4^B=-0.002039$，$p=0.0001$），个体内效应不显著（$p=0.826$），说明高BMI孕妇Y浓度总体偏低，但短期BMI波动影响微弱。（3）个体间变异占总变异的67.7\%（ICC$=0.677$），表明个体基线差异巨大，忽视个体层次将掩盖真实的纵向生理规律。
+
+\noindent\textbf{稳健性检验：}模型诊断全部通过（拟合值越界比例0.00\%）；排除15个极端值后关键系数变化均小于7\%；1000次Bootstrap重抽样（成功率100\%）所得置信区间与参数区间高度一致。检验结果说明，虽然残差峰度偏高（3.44），但主要结论稳健可靠。
+
+\noindent\textbf{结论：}本文给出的关系模型能够定量刻画Y染色体浓度随孕周和BMI的变化规律，显著性检验完整；Simpson悖论的发现说明关系刻画必须区分比较层次，为后续最佳检测时点选择（第二、三问）提供依据。
+
+\vspace{1em}
+\noindent\textbf{关键词：}无创产前检测；Y染色体浓度；线性混合效应模型；个体内--个体间分解；Simpson悖论；重复测量
+\end{abstract}
+
+\newpage
+\tableofcontents
+\newpage
+
+% ============================================================
+% 一、问题重述
+% ============================================================
+\section{问题重述}
+
+无创产前检测（Non-Invasive Prenatal Testing, NIPT）通过对孕妇外周血中的胎儿游离DNA进行测序分析，筛查胎儿染色体数目异常（如唐氏综合征、爱德华氏综合征、帕陶氏综合征等）。检测的准确性取决于血液样本中胎儿游离DNA所占的比例（胎儿分数）。对于男胎，可以通过检测Y染色体序列的浓度来估计胎儿分数，临床上通常要求Y染色体浓度达到4\%的判定阈值方可认为检测可靠。检测时点同样关键：过早检测胎儿分数不足、准确率低；过晚检测则可能错失临床干预的最佳窗口期（题目给出的可检测期为10--25周）。此外，已有实践表明，高BMI孕妇的胎儿分数往往较低，检测失败的风险更高，且男胎Y染色体浓度与孕妇的孕周数及BMI紧密相关\cite{norton,cnconsensus}。
+
+题目提供的附件包含某地区以高BMI孕妇为主的NIPT检测记录，其中"男胎检测数据"工作表给出1082条检测记录，覆盖267位孕妇，同一孕妇存在多次采血检测的情形。
+
+\textbf{问题1}（本文所解决）：试分析胎儿Y染色体浓度与孕妇的孕周数和BMI等指标的相关特性，给出相应的关系模型，并检验其显著性。
+
+% ============================================================
+% 二、问题分析
+% ============================================================
+\section{问题分析}
+
+问题1本质上是一个\textbf{重复测量数据的统计关联建模}问题，需要依次回答三个子任务：
+
+\textbf{（1）相关特性分析。}需要刻画Y染色体浓度与孕周、BMI之间关联的方向与强度。直接计算全体记录上的简单相关系数并不充分：数据具有"同一孕妇多次检测"的嵌套结构，同一孕妇的观测之间不独立。忽略这种结构，会把不同层次的信息混在一起，甚至得到方向错误的结论。因此，相关分析应当在两个层次上分别进行：\textbf{个体内层次}（同一孕妇自身孕周推进时Y浓度的变化，即纵向效应）与\textbf{个体间层次}（不同孕妇之间平均孕周、BMI的差异与Y浓度差异的关联，即横向效应）。
+
+\textbf{（2）关系模型建立。}需要给出显式的参数模型，定量描述Y浓度与孕周、BMI的关系，而非仅给出相关系数。由于观测数据嵌套于孕妇个体，普通最小二乘回归（OLS）的标准误会被低估，且其系数是把个体内与个体间两种效应按样本构成加权平均后的"混合效应"，无法回答"孕周本身如何影响Y浓度"这一生理问题。因此本文以线性混合效应模型为主模型，并对随时间变化的解释变量（孕周与BMI）进行个体内--个体间（within--between）分解，分别估计两个层次的效应。
+
+\textbf{（3）显著性检验。}对模型各系数进行显著性检验（$t$检验、$p$值、95\%置信区间），并对模型进行系统的诊断（残差分析、正态性、边界检查）与稳健性验证（敏感性分析、Bootstrap检验），保证结论可靠。
+
+整体求解思路如图\ref{fig:flow}所示。
+
+\begin{figure}[htbp]
+\centering
+\fbox{\begin{minipage}{0.92\textwidth}
+\vspace{0.5em}
+\centering
+\textbf{数据预处理}（孕周格式转换、男胎筛选、描述统计）
+$\downarrow$\\
+\textbf{结构诊断}（重复测量识别、BMI时变性检查$\rightarrow$情况B）
+$\downarrow$\\
+\textbf{方法选择与模型建立}（M1聚类稳健OLS、GEE、M2线性混合效应+within--between分解）
+$\downarrow$\\
+\textbf{模型求解}（REML，随机截距，收敛检查）
+$\downarrow$\\
+\textbf{结果分析}（固定效应、随机效应、ICC、Simpson悖论验证）
+$\downarrow$\\
+\textbf{稳健性分析}（诊断、极端值敏感性、1000次Bootstrap）
+\end{minipage}}
+\caption{第一问建模与求解流程图}
+\label{fig:flow}
+\end{figure}
+
+% ============================================================
+% 三、模型假设
+% ============================================================
+\section{模型假设}
+
+为建立线性混合效应模型，本文作如下假设：
+
+\begin{enumerate}[label=(\arabic*),leftmargin=2.5em]
+\item \textbf{条件线性假设：}在给定孕周与BMI的条件下，Y染色体浓度的条件期望与两者呈线性关系。该假设由残差对各解释变量的诊断图检验（见第8.1节），诊断结果未显示系统性非线性模式。
+\item \textbf{随机截距正态性假设：}每位孕妇的个体随机截距$u_i$独立同分布于$N(0,\sigma_u^2)$。随机截距的Q-Q图检验支持该假设（附录图\ref{fig:A5}）。
+\item \textbf{残差独立同方差假设：}个体内残差$\varepsilon_{ij}$独立同分布于$N(0,\sigma_e^2)$。残差对拟合值及解释变量的散点图未显示异方差模式（附录图\ref{fig:A1}--\ref{fig:A3}）；残差正态性存在轻度偏离（峰度3.44），本文通过Bootstrap非参数检验验证结论不因此改变。
+\item \textbf{组内中心化完备性：}$\sum_j(\mathrm{Week}_{ij}-\overline{\mathrm{Week}}_i)=0$，即组内离差的个体均值为零，由分解构造方式保证。
+\item \textbf{重复测量结构：}同一孕妇的多次检测构成聚类单元，个体间观测相互独立。模型的随机截距显式刻画了个体内相关。
+\item \textbf{检测时点与个体特征无系统性关联：}即"平均检测孕周"与未观测的个体基线因素无关。本文发现这一假设在数据中\textbf{不成立}——早期检测孕妇的基线Y浓度显著更高，这正是个体间效应为负的来源（第7.3节），本文将其作为重要发现加以讨论，而非掩盖。
+\end{enumerate}
+
+% ============================================================
+% 四、符号说明
+% ============================================================
+\section{符号说明}
+
+\begin{table}[htbp]
+\centering
+\caption{主要符号说明}
+\label{tab:symbols}
+\begin{tabular}{cl}
+\toprule
+符号 & 含义 \\
+\midrule
+$i$ & 孕妇编号，$i=1,2,\dots,N$，$N=267$ \\
+$j$ & 第$i$位孕妇的检测序号，$j=1,2,\dots,m_i$ \\
+$Y_{ij}$ & 第$i$位孕妇第$j$次检测的Y染色体浓度（比例，$\in[0,1]$） \\
+$\mathrm{Week}_{ij}$ & 第$i$位孕妇第$j$次检测时的孕周数（周） \\
+$\mathrm{BMI}_{ij}$ & 第$i$位孕妇第$j$次检测时的BMI（$\mathrm{kg/m^2}$） \\
+$\overline{\mathrm{Week}}_i$ & 第$i$位孕妇的平均检测孕周（个体间变量） \\
+$\mathrm{Week}_{ij}-\overline{\mathrm{Week}}_i$ & 孕周的组内离差（个体内变量） \\
+$\overline{\mathrm{BMI}}_i$ & 第$i$位孕妇的平均BMI（个体间变量） \\
+$\mathrm{BMI}_{ij}-\overline{\mathrm{BMI}}_i$ & BMI的组内离差（个体内变量） \\
+$\beta_0$ & 固定效应截距 \\
+$\beta_1^W,\beta_2^B$ & 孕周的个体内、个体间效应系数 \\
+$\beta_3^W,\beta_4^B$ & BMI的个体内、个体间效应系数 \\
+$u_i$ & 第$i$位孕妇的随机截距，$u_i\sim N(0,\sigma_u^2)$ \\
+$\varepsilon_{ij}$ & 个体内残差，$\varepsilon_{ij}\sim N(0,\sigma_e^2)$ \\
+$\sigma_u^2,\sigma_e^2$ & 个体间方差、个体内（残差）方差 \\
+$\rho$ & 组内相关系数ICC，$\rho=\sigma_u^2/(\sigma_u^2+\sigma_e^2)$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ============================================================
+% 五、数据描述与预处理
+% ============================================================
+\section{数据描述与预处理}
+
+\subsection{数据来源与变量选取}
+
+本文使用题目附件"男胎检测数据"工作表，共1082条检测记录、267位孕妇，全部记录Y染色体浓度非空。问题1涉及的变量映射为：孕妇代码（聚类单元）、孕周（"周数$w$+天数$d$"格式字符串）、BMI以及响应变量Y染色体浓度（比例，范围0.01--0.23）。年龄、身高、体重、IVF方式等字段留作敏感性分析备选协变量。
+
+\subsection{数据清洗}
+
+数据质量检查显示：关键字段\textbf{无缺失}（缺失率0\%）、\textbf{无完全重复行}、孕妇代码与样本序号均唯一可追溯，无需删除异常记录（孕周最大值29周虽超出题面10--25周的常规范围，但仍在产前检测的临床可能范围内，予以保留）。唯一需要转换的是孕周字段，其原始格式为字符串（如"11w+6"），按如下公式转换为连续周数：
+
+\begin{equation}
+G = w + d/7, \qquad 0\le d < 7 .
+\end{equation}
+
+全部1082条记录的孕周解析成功（成功率100\%），转换后孕周范围为$[11.0, 29.0]$周。
+
+\subsection{描述性统计}
+
+\begin{table}[htbp]
+\centering
+\caption{主要变量描述性统计（$n=1082$）}
+\label{tab:desc}
+\begin{tabular}{lccccccc}
+\toprule
+变量 & 均值 & 标准差 & 最小值 & 中位数 & 最大值 \\
+\midrule
+年龄（岁） & 28.94 & 3.66 & 21 & 29 & 43 \\
+身高（cm） & 161.06 & 5.23 & 144.0 & 161.0 & 175.0 \\
+体重（kg） & 83.89 & 9.92 & 53.0 & 84.0 & 140.0 \\
+孕周（周） & 16.85 & 4.08 & 11.0 & 16.71 & 29.0 \\
+BMI & 32.29 & 2.97 & 20.70 & 32.42 & 46.88 \\
+Y染色体浓度 & 0.077 & 0.030 & 0.01 & 0.075 & 0.23 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+表\ref{tab:desc}显示：样本BMI均值32.29，与题面"该地区孕妇大多为高BMI"的描述一致；Y浓度中位数0.075高于4\%判定阈值（0.04），说明多数检测记录达到达标线，但仍有相当比例处于阈值附近；孕周分布覆盖10--25周可检测窗口（标准差4.08周），为刻画Y浓度随孕周的纵向变化提供了充分的信息量。
+
+\subsection{重复测量结构与BMI时变性}
+
+数据结构呈现\textbf{显著的重复测量特征}：267位孕妇中，260位（97.4\%）有多次检测，平均每位孕妇4.05次，最多8次，仅7位（2.6\%）为单次检测。因此建模必须处理个体内相关，普通OLS不再适用。
+
+进一步检查发现，92.88\%的孕妇BMI在多次检测间存在变化（超过预定的10\%阈值），说明BMI不能仅视为个体间恒定变量，孕周与BMI均需进行个体内--个体间分解（即模型规格中的"情况B"）。
+
+% ============================================================
+% 六、模型建立与求解
+% ============================================================
+\section{模型建立与求解}
+
+\subsection{建模思路与方法选择}
+
+重复测量数据的建模存在三种常用思路：其一，聚类稳健OLS（M1），保持OLS估计但将标准误按孕妇聚类校正，只修正推断而不修正估计，其系数仍是两种层次效应的混合\cite{cameron,wooldridge}；其二，广义估计方程（GEE），通过工作相关矩阵刻画个体内相关，同样给出边际（混合）效应\cite{liang}；其三，线性混合效应模型（M2），显式引入随机截距刻画个体基线差异，并可通过within--between分解分别估计个体内与个体间效应\cite{laird,pinheiro}。
+
+本文以M2为主模型、M1与GEE为对照。三模型对孕周、BMI系数的估计见表\ref{tab:mcompare}。
+
+\begin{table}[htbp]
+\centering
+\caption{三种模型的孕周与BMI系数估计对比}
+\label{tab:mcompare}
+\begin{threeparttable}
+\begin{tabular}{lccc}
+\toprule
+系数 & M1聚类稳健OLS & GEE（可交换相关） & M2混合效应（分解后） \\
+\midrule
+孕周（混合） & $+0.001255$\tnote{a} & $+0.003145$\tnote{b} & --- \\
+孕周（个体内$\beta_1^W$） & --- & --- & $\mathbf{+0.003168}$ \\
+孕周（个体间$\beta_2^B$） & --- & --- & $\mathbf{-0.003286}$ \\
+BMI（混合） & $-0.001964$\tnote{a} & $-0.001320$\tnote{b} & --- \\
+BMI（个体内$\beta_3^W$） & --- & --- & $+0.000212$（不显著） \\
+BMI（个体间$\beta_4^B$） & --- & --- & $\mathbf{-0.002039}$ \\
+$R^2$ & 0.046 & --- & --- \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\item[a] 由B交付代码 \texttt{q1\_analysis\_complete.py} 按同一数据、同一规格复算所得（M1的$\beta_{\mathrm{week}}=+0.001255$与$R^2=0.046$与B交付文档记录一致，交叉验证通过）。
+\item[b] 由B交付代码同一数据、同一规格（可交换相关工作相关结构、稳健标准误）复算补充。
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+表\ref{tab:mcompare}揭示了方法选择的关键依据：M1给出的孕周混合系数仅为$+0.001255$，与GEE的$+0.003145$存在明显差异；而M2分解后显示，个体内效应（$+0.003168$）与个体间效应（$-0.003286$）\textbf{大小相近而方向相反}，两者相互抵消。这说明M1的"混合"估计实际上是两个符号相反的效应加权平均的结果，既不能代表真实的纵向生理规律，也不能单独刻画个体间差异。因此，仅依靠M1或GEE都会掩盖数据中最重要的结构，必须采用M2的within--between分解。
+
+\subsection{Within--Between分解原理}
+
+对任一随时间变化的解释变量$x_{ij}$，将其分解为个体均值（between成分）与组内离差（within成分）之和：
+
+\begin{equation}
+x_{ij} = (x_{ij}-\bar{x}_i) + \bar{x}_i = x_{ij}^{W} + x_i^{B},
+\end{equation}
+
+其中$\bar{x}_i$为第$i$位孕妇所有观测的个体均值。若不分解而直接以$x_{ij}$进入含随机截距的混合模型，所得系数是$\beta^{W}$与$\beta^{B}$按组内方差占比的加权平均（当个体内与个体间方差近似相等时接近等权平均）。当两种效应方向相反时，混合系数趋于零甚至反向，即产生Simpson悖论式的误导\cite{simpson,neuhaus,bell}。分解后的模型将两者分别估计：$\beta^{W}$回答"同一孕妇孕周推进时Y浓度如何变化"（纵向生理效应），$\beta^{B}$回答"平均孕周不同的孕妇之间Y浓度有何差异"（横向群体差异）。
+
+\subsection{M2线性混合效应模型}
+
+对孕周与BMI同时进行分解，建立M2模型（情况B）：
+
+\begin{equation}
+Y_{ij} = \beta_0 + \beta_1^W(\mathrm{Week}_{ij}-\overline{\mathrm{Week}}_i) + \beta_2^B\,\overline{\mathrm{Week}}_i + \beta_3^W(\mathrm{BMI}_{ij}-\overline{\mathrm{BMI}}_i) + \beta_4^B\,\overline{\mathrm{BMI}}_i + u_i + \varepsilon_{ij},
+\label{eq:m2}
+\end{equation}
+
+其中$u_i\sim N(0,\sigma_u^2)$为随机截距，刻画第$i$位孕妇的基线Y浓度水平；$\varepsilon_{ij}\sim N(0,\sigma_e^2)$为个体内残差；$\beta_0$为总体截距。分解构造保证了$\sum_j(\mathrm{Week}_{ij}-\overline{\mathrm{Week}}_i)=0$（数值验证组内均值绝对值小于$10^{-10}$）。
+
+\subsection{模型求解}
+
+模型(\ref{eq:m2})采用限制极大似然（REML）估计，优化算法为L-BFGS\cite{fitzmaurice}。求解过程稳定收敛（收敛状态：是，迭代次数小于100），共使用1082条观测、267个聚类单元。随机效应方差分量估计为$\hat{\sigma}_u^2=0.000612$（标准差0.0247）、$\hat{\sigma}_e^2=0.000292$（标准差0.0171），组内相关系数
+
+\begin{equation}
+\rho = \frac{\hat{\sigma}_u^2}{\hat{\sigma}_u^2+\hat{\sigma}_e^2} = \frac{0.000612}{0.000612+0.000292} = 0.677 .
+\end{equation}
+
+ICC$=0.677$远高于0.05的经验阈值，说明67.7\%的总变异来自孕妇个体间的基线差异，个体内相关不可忽略，从数据上证明了引入随机截距的必要性，也意味着任何忽略个体层次的模型都可能得出误导性结论。
+
+% ============================================================
+% 七、结果分析
+% ============================================================
+\section{结果分析}
+
+\subsection{固定效应估计}
+
+M2模型的固定效应估计结果见表\ref{tab:coef}。
+
+\begin{table}[htbp]
+\centering
+\caption{M2模型固定效应系数估计（$n=1082$，$N=267$，REML）}
+\label{tab:coef}
+\begin{threeparttable}
+\begin{tabular}{lccccc}
+\toprule
+变量 & 系数$\hat{\beta}$ & 标准误 & $t$统计量 & $p$值 & 95\%置信区间 \\
+\midrule
+截距 & $+0.198$ & 0.020 & $+9.71$ & $<0.0001$ & $[+0.158,\ +0.238]$ \\
+孕周（个体内）$\beta_1^W$ & $+0.003168$ & 0.000185 & $+17.08$ & $<0.0001$ & $[+0.002805,\ +0.003532]$ \\
+孕周（个体间）$\beta_2^B$ & $-0.003286$ & 0.000724 & $-4.54$ & $<0.0001$ & $[-0.004705,\ -0.001867]$ \\
+BMI（个体内）$\beta_3^W$ & $+0.000212$ & 0.000963 & $+0.22$ & $0.826$ & $[-0.001676,\ +0.002100]$ \\
+BMI（个体间）$\beta_4^B$ & $-0.002039$ & 0.000536 & $-3.80$ & $0.0001$ & $[-0.003090,\ -0.000988]$ \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\item 显著性水平：$***\,p<0.001$。除BMI（个体内）外，其余变量均高度显著。
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\textbf{（1）孕周的个体内效应。}$\hat{\beta}_1^W=+0.003168$（$p<0.0001$），即对同一孕妇，孕周每增加1周，Y染色体浓度平均上升0.00317，约占样本Y浓度均值（0.077）的4.1\%。若以题面关注的可检测窗口度量，孕周从12周推进到24周，Y浓度预计上升约$0.003168\times12\approx0.038$，即约3.8个百分点——这对于4\%的判定阈值而言是不可忽略的增量，说明\textbf{孕周推进伴随Y染色体浓度上升}，符合胎儿分数随孕周增长的生理预期。
+
+\textbf{（2）孕周的个体间效应。}$\hat{\beta}_2^B=-0.003286$（$p<0.0001$），即不同孕妇之间，平均检测孕周每相差1周，Y浓度平均相差约$-0.00329$（方向为负）。平均孕周相差4周的两位孕妇，Y浓度平均差异约为$-0.003286\times4\approx-0.013$（约1.3个百分点）。个体间与个体内效应\textbf{大小相近、方向相反}，这正是第6.1节所指的Simpson悖论现象，将在第7.3节专门验证与解释。
+
+\textbf{（3）BMI效应。}个体间效应$\hat{\beta}_4^B=-0.002039$（$p=0.0001$）显著为负，即BMI较高的孕妇Y浓度总体偏低（BMI每高1个单位，Y浓度平均低约0.00204，约占均值的2.6\%），与题面"高BMI孕妇胎儿分数较低"的临床观察一致；个体内效应$\hat{\beta}_3^W=+0.000212$（$p=0.826$）不显著，说明在检测的短周期内BMI的波动并不伴随Y浓度的系统性变化。BMI的作用主要体现为个体间的横向差异，而非个体内的纵向影响。
+
+\subsection{随机效应与个体间变异}
+
+随机效应方差分量（表\ref{tab:var}）表明，个体间方差（$\hat{\sigma}_u^2=0.000612$）约为残差方差（$\hat{\sigma}_e^2=0.000292$）的两倍，ICC$=0.677$。这意味着在解释Y浓度的总变异时，\textbf{孕妇个体之间的基线差异是变异的主要来源}：不同孕妇"先天"的Y浓度水平差异巨大，而孕周、BMI等可观测变量的解释力相对有限（M1的$R^2$仅0.046）。这一结构特征对建模具有两层含义：其一，忽略个体层次的模型（如M1）会把个体差异与真正的解释变量效应混在一起；其二，任何针对新个体的预测都应基于其所属群体的特征，而不能简单地把个体内规律外推到个体间。
+
+\begin{table}[htbp]
+\centering
+\caption{M2模型随机效应方差分量}
+\label{tab:var}
+\begin{tabular}{lccc}
+\toprule
+成分 & 方差估计 & 标准差 & 占比 \\
+\midrule
+随机截距（个体间）$\sigma_u^2$ & 0.000612 & 0.0247 & 67.7\%（ICC） \\
+残差（个体内）$\sigma_e^2$ & 0.000292 & 0.0171 & 32.3\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Simpson悖论的发现与验证}
+
+第7.1节的结果表明：\textbf{对同一孕妇纵向观察，孕周增加伴随Y浓度上升；但横向比较不同孕妇，平均孕周较高者Y浓度反而更低。}个体内正效应与个体间负效应共存，且方向相反、大小相近，这是典型的Simpson悖论\cite{simpson}。为确证这一现象并非模型设定所致，本文从数据本身出发进行独立验证，结果见图\ref{fig:simpson}与表\ref{tab:simpson}。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.96\textwidth]{figures/fig1_simpson.png}
+\caption{孕周效应中Simpson悖论的验证。A：个体间分析显示负相关（$r=-0.26$，$p<0.0001$），平均孕周较高的孕妇Y浓度较低；B：20位随机抽取的孕妇的个体内轨迹以正向趋势为主，全部260位多次检测孕妇中87.3\%的个体内趋势为正；C：基线Y浓度（首次检测）与平均孕周呈负相关（$r=-0.30$，$p<0.0001$），支持样本选择假说；D：260位孕妇个体内相关系数分布，平均$r=+0.67$，87.3\%为正。该悖论表明within--between分解的必要性：混合分析（M1：$\beta=+0.001255$）掩盖了真实的个体内生理效应（$\beta=+0.003168$）。}
+\label{fig:simpson}
+\end{figure}
+
+\begin{table}[htbp]
+\centering
+\caption{Simpson悖论的定量证据}
+\label{tab:simpson}
+\begin{tabular}{lccc}
+\toprule
+证据 & 统计量 & 样本 & $p$值 \\
+\midrule
+个体内相关（纵向） & $r=+0.67$ & 260位多次检测孕妇 & $<0.0001$ \\
+个体间相关（横向） & $r=-0.26$ & 267位孕妇 & $<0.0001$ \\
+基线Y浓度$\sim$平均孕周 & $r=-0.30$ & 267位孕妇 & $<0.0001$ \\
+个体内趋势为正的比例 & 87.3\% & 260位多次检测孕妇 & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+四组证据相互印证：个体内相关系数平均为$+0.67$且87.3\%的孕妇为正，个体间相关为$-0.26$，两者方向相反；而"基线Y浓度与平均孕周负相关（$r=-0.30$）"提示了悖论的可能来源——\textbf{样本选择偏倚}（假说）：平均孕周较低的孕妇（早期检测者）往往本身Y浓度基线更高，可能是由于临床风险因素被建议提前检测；平均孕周较高的孕妇（常规时点检测者）基线更低。于是，横向比较"平均孕周"时，其负向差异主要反映的是两组人群基线特征的不同，而非孕周本身的作用。若不分解，混合系数（M1的$+0.001255$）恰是正负效应相互抵消的结果，真实的纵向生理规律被掩盖。
+
+图\ref{fig:coefplot}以系数图的形式直观对比了各效应的方向与置信区间。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/fig2_within_between.png}
+\caption{含within--between分解的混合效应模型（M2）固定效应估计及95\%置信区间。孕周呈现方向相反的效应：个体内$\beta=+0.003$（95\%CI：$[+0.003,+0.004]$）对个体间$\beta=-0.003$（95\%CI：$[-0.005,-0.002]$）。BMI仅个体间显著（$\beta=-0.002$，$p<0.001$），个体内无效应（$p=0.83$）。阴影区域为1000次Bootstrap置信区间，与参数置信区间高度一致，表明尽管残差峰度为3.44，推断仍然可靠。}
+\label{fig:coefplot}
+\end{figure}
+
+\subsection{对问题1的回答}
+
+综合以上结果，Y染色体浓度与孕周、BMI的关系模型如式(\ref{eq:m2})，其参数估计与显著性检验汇总于表\ref{tab:coef}。对问题1的回答可概括为：
+
+（1）\textbf{相关特性}：Y染色体浓度与孕周的关联方向同比较层次有关——个体内正相关（$r=+0.67$）、个体间负相关（$r=-0.26$），存在Simpson悖论；Y浓度与BMI的关联主要体现在个体间（负向），个体内不显著。
+
+（2）\textbf{关系模型}：线性混合效应模型（式\ref{eq:m2}）能够同时刻画两个层次的效应，估计了全部参数及其置信区间。
+
+（3）\textbf{显著性检验}：除BMI的个体内效应外，孕周的个体内、个体间效应与BMI的个体间效应均在$\alpha=0.001$水平上高度显著；随机截距方差显著不为零（ICC$=0.677$），证明混合效应设定的必要性。
+
+% ============================================================
+% 八、稳健性分析
+% ============================================================
+\section{稳健性分析}
+
+\subsection{模型诊断}
+
+对M2模型执行系统诊断（诊断图见附录A）：残差对拟合值、孕周、BMI的散点图均未显示异方差或系统性趋势；随机截距的Q-Q图近似直线，支持正态性假设；残差Q-Q图在尾部有轻度偏离，正态性检验（Shapiro-Wilk，$p<0.05$）亦拒绝正态性，偏度$+0.73$、峰度3.44，属于轻度厚尾分布。值得注意的是，\textbf{预测边界检查完美通过}：全部拟合值落在$[0.005,0.198]$区间内，越界比例为0.00\%，远优于"越界比例$<5\%$可接受"的标准，说明线性设定在响应变量取值范围内表现良好，无需进行logit变换。
+
+\subsection{极端值敏感性分析}
+
+正态性偏离的主要来源是厚尾：$\pm3$倍标准差以外的观测共15个（占1.39\%，略高于正态理论值0.3\%）。为检验极端值对结论的影响，剔除这15个观测后重新拟合模型，关键系数的变化见表\ref{tab:sens}。
+
+\begin{table}[htbp]
+\centering
+\caption{剔除15个极端值后的敏感性分析}
+\label{tab:sens}
+\begin{tabular}{lccc}
+\toprule
+变量 & 原始系数 & 剔除极端值后 & 变化幅度 \\
+\midrule
+孕周（个体内）$\beta_1^W$ & $+0.003168$ & $+0.002951$ & $-6.9\%$ \\
+孕周（个体间）$\beta_2^B$ & $-0.003286$ & $-0.003495$ & $+6.4\%$ \\
+BMI（个体内）$\beta_3^W$ & $+0.000212$ & $+0.000423$ & $+99.3\%$\tnote{a} \\
+BMI（个体间）$\beta_4^B$ & $-0.002039$ & $-0.002088$ & $+2.4\%$ \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\item[a] BMI个体内效应本身系数接近零且不显著（$p=0.826$），其相对变化虽大，但剔除极端值后仍不显著（置信区间跨越0），不影响任何结论。
+\end{tablenotes}
+\end{table}
+
+\textbf{所有关键系数的变化幅度均小于7\%}，且显著性结论完全不变：孕周个体内效应仍显著为正、个体间效应仍显著为负、BMI个体间效应仍显著为负、BMI个体内效应仍不显著。Simpson悖论的模式在剔除极端值后依然完整保留。
+
+\subsection{Bootstrap检验}
+
+鉴于残差峰度偏高（3.44）可能影响基于正态近似的小样本推断，本文进一步采用\textbf{按孕妇聚类重抽样的Bootstrap}方法（1000次迭代）进行非参数推断。结果显示1000次重抽样全部成功收敛（成功率100.0\%）。关键系数的Bootstrap百分位置信区间与参数置信区间对比见表\ref{tab:boot}，Bootstrap抽样分布见图\ref{fig:boot}。
+
+\begin{table}[htbp]
+\centering
+\caption{Bootstrap置信区间与参数置信区间对比（1000次迭代，成功率100\%）}
+\label{tab:boot}
+\begin{tabular}{lcc}
+\toprule
+变量 & 参数95\%CI & Bootstrap 95\%CI \\
+\midrule
+孕周（个体内）$\beta_1^W$ & $[+0.002805,\ +0.003532]$ & $[+0.002601,\ +0.003691]$ \\
+孕周（个体间）$\beta_2^B$ & $[-0.004705,\ -0.001867]$ & $[-0.004391,\ -0.002162]$ \\
+BMI（个体内）$\beta_3^W$ & $[-0.001676,\ +0.002100]$ & $[-0.001873,\ +0.002709]$ \\
+BMI（个体间）$\beta_4^B$ & $[-0.003090,\ -0.000988]$ & $[-0.003031,\ -0.001134]$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/fig3_bootstrap.png}
+\caption{固定效应的Bootstrap抽样分布（1000次迭代，按孕妇聚类重抽样）。红色虚线为原始REML估计值，绿色虚线为95\%Bootstrap百分位置信区间。所有关键效应（孕周个体内、个体间及BMI个体间）的Bootstrap置信区间均不跨越0，与参数置信区间高度一致；仅BMI个体内效应在所有样本中保持不显著，证实短期BMI变化不影响Y浓度。尽管残差非正态（峰度3.44），Bootstrap成功率100\%，主要结论稳健。}
+\label{fig:boot}
+\end{figure}
+
+两组置信区间高度一致，所有关键效应均不跨越零：孕周个体内效应在全部1000次重抽样中保持为正、个体间效应保持为负，Simpson悖论的"符号相反"模式在非参数框架下完全成立。这说明残差峰度偏高\textbf{不改变任何推断结论}。
+
+综合诊断、敏感性分析与Bootstrap检验：模型设定合理、结果稳健，可以支撑第7节的结论。
+
+% ============================================================
+% 九、模型评价
+% ============================================================
+\section{模型评价}
+
+\subsection{模型优点}
+
+（1）\textbf{正确处理重复测量结构}：随机截距显式建模个体内相关，ICC$=0.677$从数据上证实了这一设定的必要性，避免了OLS标准误低估与效率损失。
+
+（2）\textbf{分解层次效应、揭示Simpson悖论}：within--between分解使模型能够分别回答纵向生理规律与横向群体差异两个不同的问题，发现了混合模型必然掩盖的符号相反效应，这是本文最有价值的科学发现。
+
+（3）\textbf{可解释性强}：线性混合效应模型的每个系数都有明确的生物学解释，便于临床解读；同时为第二、三问的检测时点选择提供了直接可用的定量基础（如个体内正效应提示延迟检测与Y浓度达标概率的提升相关，该提示基于关联结果，未排除其他因素干扰；而个体间基线差异提示需按个体特征分层决策）。
+
+（4）\textbf{稳健性充分}：诊断全面、极端值敏感性变化$<7\%$、1000次Bootstrap验证，结论经得起质疑。
+
+\subsection{模型局限}
+
+（1）\textbf{残差峰度偏高}：残差分布呈轻度厚尾（峰度3.44），正态假设不严格成立。尽管Bootstrap检验表明推断不受影响，严格意义上的正态似然推断存在理论瑕疵。
+
+（2）\textbf{关联而非因果}：本文基于观测数据进行的是关联分析，模型显著系数只能表述为"伴随"关系。样本选择偏倚的解释（早期检测者基线更高）是基于相关证据的假说，并非因果证明。
+
+（3）\textbf{外推性受限}：Simpson悖论意味着个体内效应不能直接外推到个体间，对一位新孕妇的Y浓度预测应结合其个体特征（如平均检测孕周、BMI）进行条件推断；同时样本来自以高BMI孕妇为主的特定地区，结论向一般人群的推广需谨慎。
+
+（4）\textbf{个体间变异的大部分尚未被解释}：ICC$=0.677$说明个体差异是变异的主导来源，而孕周与BMI合计的解释力有限（M1的$R^2$仅0.046），提示存在年龄、妊娠方式等未纳入的个体层面因素，可作为后续研究扩展方向。
+
+% ============================================================
+% 十、结论
+% ============================================================
+\section{结论}
+
+针对问题1"分析胎儿Y染色体浓度与孕妇孕周数和BMI等指标的相关特性，给出关系模型并检验显著性"，本文完成以下工作并得到相应结论：
+
+（1）\textbf{数据层面}：对1082条男胎检测记录（267位孕妇）完成清洗与转换，确认数据具有显著的重复测量结构（97.4\%孕妇多次检测、平均4.05次/人），且92.88\%的孕妇BMI存在时变性，据此确定对孕周与BMI同时进行个体内--个体间分解的建模策略。
+
+（2）\textbf{模型层面}：建立线性混合效应模型（式\ref{eq:m2}），以随机截距刻画个体基线差异，REML求解稳定收敛。ICC$=0.677$表明67.7\%的总变异来自个体间差异，从数据上证明了混合效应设定的必要性。
+
+（3）\textbf{核心发现}：孕周与Y染色体浓度的关系呈现典型的\textbf{Simpson悖论}——个体内效应$+0.003168$（$p<0.0001$）与个体间效应$-0.003286$（$p<0.0001$）大小相近、方向相反。四组独立证据（个体内相关$+0.67$、个体间相关$-0.26$、基线浓度与平均孕周相关$-0.30$、87.3\%个体内正趋势）确认该现象真实存在，其可能来源为样本选择偏倚（假说）：早期检测的孕妇基线Y浓度更高。混合模型（M1）仅给出$+0.001255$的抵消后净效应，会完全掩盖真实的纵向生理规律。
+
+（4）\textbf{BMI效应}：个体间显著为负（$-0.002039$，$p=0.0001$），高BMI孕妇Y浓度总体偏低，与临床观察一致；个体内不显著（$p=0.826$），短期BMI波动不伴随Y浓度系统变化。
+
+（5）\textbf{稳健性}：模型诊断通过（拟合值越界0.00\%）；剔除15个极端值后关键系数变化$<7\%$；1000次Bootstrap（成功率100\%）置信区间与参数区间高度一致。残差峰度偏高（3.44）不影响结论可靠性。
+
+（6）\textbf{对后续问题的支撑}：个体内正效应提示孕周推进伴随Y浓度上升，与达标概率的提升方向一致（基于关联结果，未排除其他因素干扰）；个体间基线差异巨大（ICC$=0.677$）与BMI的个体间负效应则说明，最佳检测时点需要按孕妇个体特征（特别是BMI）分层确定，为第二、三问的时点选择与分组策略提供了直接的定量依据。
+
+% ============================================================
+% 参考文献
+% ============================================================
+\begin{thebibliography}{99}
+\setlength{\itemsep}{1pt}
+
+\bibitem{simpson} Simpson E H. The interpretation of interaction in contingency tables[J]. Journal of the Royal Statistical Society: Series B (Methodological), 1951, 13(2): 238-241.
+
+\bibitem{laird} Laird N M, Ware J H. Random-effects models for longitudinal data[J]. Biometrics, 1982, 38(4): 963-974.
+
+\bibitem{liang} Liang K Y, Zeger S L. Longitudinal data analysis using generalized linear models[J]. Biometrika, 1986, 73(1): 13-22.
+
+\bibitem{neuhaus} Neuhaus J M, Kalbfleisch J D. Between- and within-cluster covariate effects in the analysis of clustered data[J]. Biometrics, 1998, 54(2): 638-645.
+
+\bibitem{pinheiro} Pinheiro J C, Bates D M. Mixed-Effects Models in S and S-PLUS[M]. New York: Springer, 2000.
+
+\bibitem{bell} Bell A, Jones K. Explaining fixed effects: Random effects modeling of time-series cross-sectional and panel data[J]. Political Science Research and Methods, 2015, 3(1): 133-153.
+
+\bibitem{cameron} Cameron A C, Miller D L. A practitioner's guide to cluster-robust inference[J]. Journal of Human Resources, 2015, 50(2): 317-372.
+
+\bibitem{fitzmaurice} Fitzmaurice G M, Laird N M, Ware J H. Applied Longitudinal Analysis[M]. 2nd ed. Hoboken: John Wiley \& Sons, 2011.
+
+\bibitem{wooldridge} Wooldridge J M. Econometric Analysis of Cross Section and Panel Data[M]. 2nd ed. Cambridge: MIT Press, 2010.
+
+\bibitem{norton} Norton M E, Jacobsson B, Swamy G K, et al. Cell-free DNA analysis for noninvasive examination of trisomy[J]. New England Journal of Medicine, 2015, 372(17): 1589-1597.
+
+\bibitem{cnconsensus} 国家卫生健康委员会临床检验中心产前筛查与诊断专家组. 孕妇外周血胎儿游离DNA产前筛查与诊断技术规范[J]. 中华医学遗传学杂志, 2016, 33(5): 562-568.
+
+\end{thebibliography}
+
+% ============================================================
+% 附录
+% ============================================================
+\appendix
+
+\section{模型诊断图}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.80\textwidth]{figures/m2_resid_vs_fitted.png}
+\caption{残差对拟合值散点图：无明显的异方差或系统趋势模式。}
+\label{fig:A1}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.80\textwidth]{figures/m2_resid_vs_week.png}
+\caption{残差对孕周散点图：无系统趋势，支持线性设定。}
+\label{fig:A2}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.80\textwidth]{figures/m2_resid_vs_bmi.png}
+\caption{残差对BMI散点图：无系统趋势。}
+\label{fig:A3}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.80\textwidth]{figures/m2_qq_residuals.png}
+\caption{残差Q-Q图：中间部分拟合良好，尾部轻度偏离（峰度3.44），Bootstrap检验表明不影响推断。}
+\label{fig:A4}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.80\textwidth]{figures/m2_qq_ranef.png}
+\caption{随机截距Q-Q图：近似直线，支持随机效应正态性假设。}
+\label{fig:A5}
+\end{figure}
+
+\section{数据与代码可追溯性}
+
+\begin{table}[htbp]
+\centering
+\caption{数据、代码与结果文件可追溯性清单}
+\label{tab:trace}
+\begin{tabular}{p{4.5cm}p{9.5cm}}
+\toprule
+类别 & 文件与说明 \\
+\midrule
+原始数据 & 题目附件"男胎检测数据"工作表（1082条$\times$31字段） \\
+清洗数据 & \texttt{q1\_male\_data\_cleaned.csv}（1082行$\times$12列，A角色交付，数据质量A评级） \\
+变换数据 & within--between分解后数据（B交付，组内均值验证$<10^{-10}$） \\
+模型求解 & \texttt{q1\_analysis\_complete.py}（M1/M2拟合，阶段0--3） \\
+诊断分析 & \texttt{q1\_analysis\_integrated.py}（残差图、Q-Q图、边界检查，阶段4） \\
+Simpson验证 & \texttt{verify\_simpson.py}（定量证据与图\ref{fig:simpson}） \\
+稳健性检验 & \texttt{robustness\_checks.py}（Bootstrap 1000次、敏感性分析） \\
+图表生成 & \texttt{generate\_fig1\_2.py}（图\ref{fig:coefplot}） \\
+已验证结果 & \texttt{verified\_results.md}（B签字确认，本文全部数字的唯一来源） \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}
