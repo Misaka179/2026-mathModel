@@ -216,18 +216,49 @@ with open('../05_results/result_data_q2.json', 'w', encoding='utf-8') as f:
 
 print(f"  Saved summary data to result_data_q2.json")
 
-print("\n[Step 6/6] Generating figures...")
-# Run figure generation script
+print("\n[Step 6/8] Generating figures (PNG format)...")
+# Run figure generation scripts
 import subprocess
+
+# Generate main figures (PNG)
 result = subprocess.run([sys.executable, 'generate_cn_figures.py'],
                        capture_output=True, text=True)
-
 if result.returncode == 0:
-    print("  [OK] All figures generated successfully")
+    print("  [OK] Main figures (图1-5) generated successfully")
 else:
-    print(f"  [WARNING] Figure generation had issues:")
+    print(f"  [WARNING] Main figure generation had issues:")
     print(result.stderr)
 
+# Generate supplementary figures (PNG)
+if os.path.exists('04_code/generate_supplementary_figures.py'):
+    result = subprocess.run([sys.executable, '04_code/generate_supplementary_figures.py'],
+                           capture_output=True, text=True)
+    if result.returncode == 0:
+        print("  [OK] Supplementary figures (图6-7) generated successfully")
+    else:
+        print(f"  [WARNING] Supplementary figure generation had issues:")
+        print(result.stderr)
+
+print("\n[Step 7/8] Generating figures (SVG format)...")
+# Generate main figures (SVG)
+result = subprocess.run([sys.executable, 'generate_cn_figures_svg.py'],
+                       capture_output=True, text=True)
+if result.returncode == 0:
+    print("  [OK] Main figures (图1-5) SVG generated successfully")
+else:
+    print(f"  [WARNING] SVG main figure generation had issues:")
+    print(result.stderr)
+
+# Generate supplementary figures (SVG)
+result = subprocess.run([sys.executable, 'generate_supplementary_figures_svg.py'],
+                       capture_output=True, text=True)
+if result.returncode == 0:
+    print("  [OK] Supplementary figures (图6-7) SVG generated successfully")
+else:
+    print(f"  [WARNING] SVG supplementary figure generation had issues:")
+    print(result.stderr)
+
+print("\n[Step 8/8] Summary...")
 print("\n" + "="*80)
 print("RESULTS GENERATION COMPLETE")
 print("="*80)
@@ -236,5 +267,6 @@ print("  04_code/energy_balance_verified.json")
 print("  04_code/no_storage_baseline_results.json")
 print("  05_results/result2.xlsx")
 print("  05_results/result_data_q2.json")
-print("  06_figures/图1-5.png (if successful)")
+print("  06_figures/图1-7.png (PNG format)")
+print("  06_figures/图1-7.svg (SVG format - for paper editing)")
 print("\nNext step: Review results and update documentation")
