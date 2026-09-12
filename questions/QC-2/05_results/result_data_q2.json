@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "generated": "2026-09-12 11:19:19",
+    "source": "full_year_backtest_results.json",
+    "boundary_condition": "cross_day_continuity",
+    "days": 334
+  },
+  "annual_costs": {
+    "total_cost": 14120324.29274246,
+    "plan_cost": 12870635.372171178,
+    "emergency_cost": 1249688.9205712816,
+    "plan_percentage": 91.1497151576498,
+    "emergency_percentage": 8.850284842350218
+  },
+  "daily_statistics": {
+    "average_cost": 42276.420038151075,
+    "std_cost": 16653.380016024486,
+    "min_cost": 12297.496245641241,
+    "max_cost": 112098.78982362655
+  },
+  "storage_value": {
+    "baseline_annual_cost": 82036598.15990753,
+    "with_storage_cost": 14120324.29274246,
+    "annual_savings": 67916273.86716507,
+    "savings_percentage": 82.78777446961072
+  },
+  "energy_efficiency": {
+    "total_E_plan_kWh": 20723639.933591384,
+    "total_E_plan_used_kWh": 20477060.53935229,
+    "total_E_plan_waste_kWh": 246579.3942390941,
+    "waste_rate_percent": 1.1898459683204994,
+    "waste_cost_yuan": 188928.44692323214,
+    "total_charge_internal_kWh": 5496567.219316871,
+    "total_discharge_internal_kWh": 5496497.61989994,
+    "total_emergency_kWh": 246579.3942391012,
+    "storage_cycle_efficiency": 99.9987337657459
+  },
+  "boundary_conditions": {
+    "day_1_initial_soc": 6000.0,
+    "day_334_terminal_soc": 6069.599416925926,
+    "cross_day_continuity": "E(d,0) = E(d-1,144) for d in [2,334]"
+  }
+}

@@ -20,7 +20,7 @@ Thumbs.db
 
 # 大型原始数据 / 二进制产物（个人 workspace 自留，不进仓库）
 workspace/
-*.xlsx
+# *.xlsx  # Commented to allow result files
 *.csv
 *.pkl
 *.npz

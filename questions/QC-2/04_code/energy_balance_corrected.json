@@ -1,0 +1,10 @@
+{
+  "verification_date": "2026-09-12 11:19:15",
+  "storage_efficiency_corrected": {
+    "charge_from_grid_kWh": 6107296.910352077,
+    "discharge_to_grid_kWh": 4946847.857909952,
+    "physical_efficiency_percent": 80.99897435025429,
+    "expected_efficiency_percent": 81.0,
+    "note": "Physical round-trip efficiency (grid to grid), not internal energy ratio"
+  }
+}

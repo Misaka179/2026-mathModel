@@ -1,0 +1,9 @@
+{
+  "calculation_date": "2026-09-12 11:19:15",
+  "baseline_annual_cost": 16407319.63198139,
+  "with_storage_cost": 14120324.29274246,
+  "annual_savings": 2286995.3392389305,
+  "savings_percentage": 13.938872348053033,
+  "method": "No storage, planned purchase at normal price (not emergency)",
+  "note": "All load-PV deficit purchased at spot price p(t), no κ multiplier"
+}

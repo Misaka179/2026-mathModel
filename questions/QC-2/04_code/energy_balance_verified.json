@@ -1,0 +1,14 @@
+{
+  "verification_date": "2026-09-12 11:19:16",
+  "waste_analysis": {
+    "total_E_plan_kWh": 20723639.933591384,
+    "total_E_plan_used_kWh": 20477060.53935229,
+    "total_E_plan_waste_kWh": 246579.3942390941,
+    "waste_rate_percent": 1.1898459683204994,
+    "waste_cost_yuan": 188928.44692323214,
+    "total_charge_internal_kWh": 5496567.219316871,
+    "total_discharge_internal_kWh": 5496497.61989994,
+    "total_emergency_kWh": 246579.3942391012,
+    "storage_cycle_efficiency": 99.9987337657459
+  }
+}
