@@ -14,25 +14,19 @@ class DataLoader:
     def __init__(self, base_path=None):
         """
         Initialize data loader.
-        Auto-detect path to attachments from current working directory.
+        Auto-detect path to attachments from script file location.
         """
         if base_path is None:
-            # Try to find attachments directory
-            # Could be running from project root or from code subdirectory
-            import os
-            cwd = os.getcwd()
+            # Use path relative to this script file
+            # From Q4-2/01_code/data_loader.py up 4 levels to project root
+            from pathlib import Path
+            script_dir = Path(__file__).parent.absolute()
+            attachment_path = script_dir / '../../../../C题/附件'
 
-            # Option 1: From project root
-            path1 = "C题/附件"
-            # Option 2: From code directory, go up 3 levels
-            path2 = "../../../C题/附件"
-
-            if os.path.exists(path1):
-                self.base_path = path1
-            elif os.path.exists(path2):
-                self.base_path = path2
+            if attachment_path.exists():
+                self.base_path = str(attachment_path)
             else:
-                raise FileNotFoundError(f"Cannot find attachments. CWD: {cwd}")
+                raise FileNotFoundError(f"Cannot find attachments at: {attachment_path}")
         else:
             self.base_path = base_path
 

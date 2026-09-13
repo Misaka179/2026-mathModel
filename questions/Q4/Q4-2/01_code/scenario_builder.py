@@ -1,7 +1,5 @@
 """
 Scenario construction using historical joint residuals
-Author: Role B 
-Date: 2026-09-11
 """
 
 import numpy as np

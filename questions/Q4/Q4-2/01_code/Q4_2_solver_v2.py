@@ -1,13 +1,5 @@
 """
-Q4-2 Full Year Solver V2 - 波动电价版本（基于Q2最新代码）
-
-关键更新：
-1. 基于Q2最新代码（2026-09-12 09:56版本）
-2. 唯一修改：电价从固定值改为波动数组 Price[d, t]
-3. 包含12月31日终端约束：E(334,144) = 6000 kWh
-
-日期：2026-09-12
-版本：V2（完全同步Q2）
+Q4-2 Full Year Solver V2 - 波动电价版本
 """
 
 import numpy as np
@@ -127,7 +119,12 @@ feb1_idx, dec31_idx = loader.get_planning_period()
 # Q4-2关键：加载波动电价（附件4）
 print("       Loading dynamic prices from 附件4...")
 import pandas as pd
-df_price = pd.read_excel('C题/附件/附件4.xlsx')
+from pathlib import Path
+
+# Use path relative to this script file
+script_dir = Path(__file__).parent.absolute()
+price_file = script_dir / '../../../../C题/附件/附件4.xlsx'
+df_price = pd.read_excel(str(price_file))
 price_all = df_price.iloc[:, 1:145].values  # (365, 144)
 print(f"       ✓ Dynamic prices loaded: {price_all.shape}")
 print(f"       Price range: [{price_all.min():.4f}, {price_all.max():.4f}] yuan/kWh")
@@ -257,10 +254,13 @@ print(f"  Difference: {abs(last['terminal_soc'] - E_INIT):.2f} kWh")
 
 # Save results
 print("\n[4/4] Saving results...")
-output_dir = '../05_results/Q4-2'
-os.makedirs(output_dir, exist_ok=True)
+# Use path relative to script file
+from pathlib import Path
+script_dir = Path(__file__).parent.absolute()
+output_dir = script_dir / '../02_results'
+output_dir.mkdir(parents=True, exist_ok=True)
 
-output_file = os.path.join(output_dir, 'Q4_2_backtest_results_v2.json')
+output_file = output_dir / 'Q4_2_backtest_results_v2.json'
 with open(output_file, 'w') as f:
     json.dump({
         'metadata': {
